@@ -1,12 +1,16 @@
 import requests
 
-scraper_url = 'http://api.scraperapi.com?api_key=800a43e7386a5a4f5801c8762c3a4aab&url='
+scraper_url = 'http://api.scraperapi.com?api_key=<API KEY HERE>&url='
 base_url = 'https://www.listchallenges.com/500-random-musical-artists'
 
 artists = []
 
 def scrape_artists():
-	for i in range(8, 14):
+	"""
+	Function that scrapes listchallenges.com and collects various artist names
+	This file should not be run on its own
+	"""
+	for i in range(1, 14):
 		if i > 1:
 			response = requests.get(base_url + f'/list/{i}')
 		else:
