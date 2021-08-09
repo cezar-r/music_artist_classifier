@@ -29,24 +29,70 @@ REGEX = re.compile('[^a-zA-Z]')
 
 
 class DataManager:
+	"""
+	Loads in data as well, along with various cleaning tools
+	"""
 
 
 	def _clean_col(self, x):
-		if type(x) == float:
+		"""Cleans column that has /r at the end of each string due to how the CSV is read in
+		
+		Parameters
+		----------
+		x: string
+		
+		Returns
+		-------
+		x: string
+		"""
+		if type(x) == float: # in case there are any nan values
 				return 0
 		else:
 			return x.strip(f'\r')
 
 
 	def _clean_text(self, x):
+		"""Cleans text of any unwanted characters
+		
+		Parameters
+		----------
+		x: string
+		
+		Returns
+		-------
+		x: string
+		"""
 		return REGEX.sub(' ', x)
 
 
 	def _snippets(self, x):
-		return ' '.join(x.split(' ')[-50:])
+		"""Only uses the first 50 words in a song lyric (not recommeneded)
+		
+		Parameters
+		----------
+		x: string
+		
+		Returns
+		-------
+		x: string
+		"""
+		return ' '.join(x.split(' ')[:50])
 
 
 	def _explode(self, df, snip_len):
+		"""Explodes each lyric into snippets of size snip_len into multiple rows
+		Ex: (snip_len = 2) 
+		"i walked the dog today" -> "i walked" "the dog" "today"
+		
+		Parameters
+		----------
+		df: pd.DataFrame
+		snip_len: int
+		
+		Returns
+		-------
+		df: pd.DataFrame
+		"""
 		df = pd.concat([pd.Series(row['artist'], 
 			[' '.join(row['lyrics'].split(' ')[i: i+snip_len]) for i in range(0, len(row['lyrics'].split(' ')), snip_len)]) for _, row in df.iterrows() 
 		]).reset_index()
@@ -55,6 +101,18 @@ class DataManager:
 
 
 	def load_data(self, filename="test", snippets = False, explode = False):
+		"""Loads data into pandas DataFrame from desired CSV/TXT file
+		
+		Parameters
+		----------
+		filename: string
+		snippets: bool
+		explode: int or bool
+		
+		Returns
+		-------
+		df: pd.DataFrame
+		"""
 		df = pd.read_csv(f'../data/{filename}.txt', delimiter = '|', lineterminator='\n')
 		df.columns = ['artist', 'song', 'lyrics', 'genre']
 		df['genre'] = df.loc[:, 'genre'].apply(self._clean_col)
@@ -70,8 +128,19 @@ class DataManager:
 
 
 class Classifier:
+	"""
+	Used to train and test model. Has methods for PCA plots as well. Also used to save and load pickle files.
+	"""
 
 	def __init__(self, data = None, model = SGDClassifier):
+		"""Initalizes data as well as model that is being used
+		
+		Parameters
+		----------
+		data: pd.DataFrame
+		model: 
+			default: SGDClassifier. Can use most SKLearn classifier models
+		"""
 		self.data = data
 		self.model = model(loss = 'log')
 		if self.data is not None:
@@ -79,17 +148,37 @@ class Classifier:
 
 
 	def _split_data(self):
+		"""Splits data into train and test data"""
 		X = self.data.lyrics
 		y = self.data.artist
 		self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size = .2)
 
 	def _arr_to_str(self, x):
+		"""Converts an array to string
+		
+		Parameters
+		----------
+		x: list or string
+		
+		Returns
+		-------
+		x: string
+		"""
 		if type(x) == list:
 			return " ".join(x)
 		else:
 			return x
 
 	def fit(self,  vector_params, over_sample = False, under_sample = False):
+		"""Trains model. Has parameters that dictate what parameters are used for the CountVectorizer
+		as well as parameters for over sampling and under sampling
+		
+		Parameters
+		----------
+		vector_params: dict
+		over_sample: bool
+		under_sample: bool
+		"""
 		if over_sample:
 			over_sampler = RandomOverSampler()
 			self.X_train, self.y_train = over_sampler.fit_resample(self.X_train.to_numpy().reshape(-1, 1), self.y_train)
@@ -111,10 +200,21 @@ class Classifier:
 
 
 	def predict(self):
+		"""Uses trained model to predict unseen data"""
 		self.y_hat = self.pipe.predict(self.X_test)
 		
 
-	def accuracy(self):
+	def accuracy(self, verbose = False):
+		"""Prints/returns the models accuracy
+		
+		Parameters
+		----------
+		verbose: bool
+		
+		Returns
+		-------
+		self.accuracy: int
+		"""
 		self.accuracy = accuracy_score(self.y_test, self.y_hat)
 		if verbose:
 			print(self.accuracy)
@@ -122,6 +222,16 @@ class Classifier:
 
 
 	def report(self, verbose = True):
+		"""Prints/returns the models classification report
+		
+		Parameters
+		----------
+		verbose: bool
+		
+		Returns
+		-------
+		classification_report: string
+		"""
 		if verbose:
 			print(classification_report(self.y_test, self.y_hat))
 		return classification_report(self.y_test, self.y_hat)
@@ -129,12 +239,17 @@ class Classifier:
 
 
 	def _get_data(self, df):
-		"""Labels data in DatFrame
+		"""Labels data in DataFrame using LabelEncoder object
 
 		Parameters
 		----------
 		df: pd.DataFrame
-			all data
+			
+		Returns
+		-------
+		data: list
+		y: np.array
+		genre_label_map: dict
 		"""
 		data = list(df.lyrics.values)
 		labels = df.artist
@@ -153,39 +268,34 @@ class Classifier:
 	def _vectorizer(self, data):
 		"""Creates a tfidf and returns it as an np.array, as well as the feature names (vocabulary)
 	    
-	    Parameters
-	    ----------
-	    data: arr
-	    	list of all lyrics
-	    """
+		Parameters
+		----------
+		data: list
+		
+		Returns
+		-------
+		X: np.array
+		np.array
+		"""
 		tfidf = TfidfVectorizer()
 		X = tfidf.fit_transform(data).toarray()
 		return X, np.array(tfidf.get_feature_names())
 
 
 
-	def _plot_embedding(self, X, y, label_map, title=None):
-	    """Plot an embedding of the mnist dataset onto a plane.
+	def _plot_embedding(self, X, y, label_map):
+	    """Plot two dimensional PCA embedding
 	    
 	    Parameters
 	    ----------
-	    ax: matplotlib.axis object
-	      The axis to make the scree plot on.
-	      
-	    X: numpy.array, shape (n, 2)
-	      A two dimensional array containing the coordinates of the embedding.
-	      
+	    X: numpy.array
 	    y: numpy.array
-	      The labels of the datapoints.  Should be digits.
-	      
-	    title: str
-	      A title for the plot.
+	    label_map: dict
 	    """
 	    x_min, x_max = np.min(X, 0), np.max(X, 0)
 	    X = (X - x_min) / (x_max - x_min)
 
 	    plt.rcParams["figure.figsize"] = (18, 7)
-	    # plt.set_size_inches(15, 8)
 
 	    color_map = {'0' : 'purple',
 	    			'1' : 'red',
@@ -228,12 +338,21 @@ class Classifier:
 
 
 	def _clean_report(self, report):
+		"""Converts the classification report (type str) into a dictionary
+		
+		Parameters
+		----------
+		report: string
+		
+		Returns
+		-------
+		sorted_scores_dict: dict
+		"""
 		report = report.replace('\n', '')
 		new_str = [report[0+i:66+i] for i in range(0, len(report), 66)]
 		scores_dict = {}
 		for string in new_str[1:-3]:
 			line = string.split('   ')
-			# accuracy = line[-4]
 			for char in line:
 				if char != '':
 					artist = char.lstrip()
@@ -248,6 +367,16 @@ class Classifier:
 
 
 	def _relabel_rows(self, x):
+		"""Relabels artists who are not in the top 10 accuracy scores with "other"
+		
+		Parameters
+		----------
+		x: string
+		
+		Returns
+		-------
+		x: string
+		"""
 		if x in self.top_ten_artists:
 			return x
 		else:
@@ -255,8 +384,13 @@ class Classifier:
 
 
 	def _relabel_df(self):
-		# get top artists
-		# if artist != top artist, label as other
+		"""Relabels the data such that artists who are not one of the top 10 predicted artists
+		(in terms of accuracy) are labelled as "other"
+		
+		Returns
+		-------
+		new_df: pd.DataFrame
+		"""
 		report = self.report()
 		report = self._clean_report(report)
 		self.top_ten_artists = list(report.keys())[:9]
@@ -266,13 +400,7 @@ class Classifier:
 
 
 	def plot_artist_labels(self):
-		"""Parent function to plotting genre cluster graph
-
-		Parameters
-		----------
-		df: pd.DataFrame
-			all data
-		"""
+		"""Parent function to plotting genre cluster graph"""
 		new_df = self._relabel_df()
 		data, y, label_map = self._get_data(new_df)
 		print('vectorizing')
@@ -289,6 +417,18 @@ class Classifier:
 
 
 	def predict_one(self, lyric, show = 10, verbose = False):
+		"""Predicts artists for one lyric
+		
+		Parameters
+		----------
+		lyric: string
+		show: int
+		verbose: bool
+		
+		Returns
+		-------
+		artists: list
+		"""
 		lyric = lyric.lower()
 		pred = self.pipe.predict_proba(pd.Series([lyric]))
 		pred = pred.tolist()[0]
@@ -309,6 +449,17 @@ class Classifier:
 
 	@classmethod
 	def load(cls, file = '../models/artist_classifier.pickle'):
+		"""Loads the pickled model
+		
+		Parameters
+		----------
+		cls: Classifier
+		file: string
+		
+		Returns
+		-------
+		instance: Classifier
+		"""
 		file = open(file, "rb")
 		instance = pickle.load(file)
 		file.close()
@@ -316,6 +467,12 @@ class Classifier:
 		return instance
 
 	def save(self, file = '../models/artist_classifier.pickle'):
+		"""Saves the model as pickle
+		
+		Parameters
+		----------
+		file: string
+		"""
 		file = open(file, "wb")
 		pickle.dump(self, file)
 		file.close()
@@ -331,6 +488,21 @@ def refit_model(print_accuracy = False,
 				under_sample = False, 
 				save_model = False,
 				vector_params = {'ngram_range' : (1, 4)}):
+	"""Retrains the model
+		
+	Parameters
+	----------
+	print_accuracy: bool
+	print_report: bool
+	explode: bool
+	snip_len: int
+	plot_pca: bool
+	verbose: bool
+	over_sample: bool
+	under_sample: bool
+	save_model: bool
+	vector_params: dict
+	"""
 	
 	# loading in data
 	dm = DataManager()
@@ -369,6 +541,12 @@ def refit_model(print_accuracy = False,
 
 
 def load_model():
+	"""Retrains the model
+		
+	Returns
+	----------
+	model: Classifier
+	"""
 	sg = Classifier()
 	model = sg.load()
 	return model
