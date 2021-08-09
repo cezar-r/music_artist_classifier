@@ -29,13 +29,10 @@ REGEX = re.compile('[^a-zA-Z]')
 
 
 class DataManager:
-	"""
-	Loads in data as well, along with various cleaning tools
-	"""
-
+	"""Loads in data, with various, optional cleaning tools"""
 
 	def _clean_col(self, x):
-		"""Cleans column that has /r at the end of each string due to how the CSV is read in
+		"""Cleans each row in column that has /r at the end of each string due to how the CSV is read in
 		
 		Parameters
 		----------
