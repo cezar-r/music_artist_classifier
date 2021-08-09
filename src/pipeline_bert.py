@@ -22,7 +22,7 @@ def df_to_tf_dirs():
 	"""Converts data into format that is readable for BERT model 
 	Two folders -> train and test
 		Train and test have folders for each category
-			Each category folder has .txt files pertaining to that category
+			Each category folder has .txt files of lyrics pertaining to that category
 	"""
 	data = load_data()
 
