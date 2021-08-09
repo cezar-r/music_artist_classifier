@@ -7,25 +7,36 @@ from cmd_colors import Colors as c
 from artists import artists 
 import time
 
-last_fm_api_key = 'e34c6de6772e623c5f8fac80e4752db4'
+last_fm_api_key = '<API KEY HERE>'
 last_fm_url = 'http://ws.audioscrobbler.com'
-scraper_url = 'http://api.scraperapi.com?api_key=800a43e7386a5a4f5801c8762c3a4aab&url='
+scraper_url = 'http://api.scraperapi.com?api_key=<API KEY HERE>&url='
 bad_chars = ['?', '!', '&', ':', ';', '</i>', '<i>', '[', ']', ',', '(', ')', 'INTRO:', 'Chorus:', 'CHORUS:', 'Verse:', 'Bridge:', 'Hook:', 'HOOK:', '—', '–', '�', 'á', 'à', 'â', 'ä', 'ç', 'é', 'è', 'ë', 'í', 'ì', 'ï', 'ì', 'Ò', 'ó', 'ò', 'ö', 'ú', 'ù', 'û', 'ü', 'ß', 'ñ', '…', '’', '‘', '“', '”', '¿', f'\n', f'\n\n', "'", '"', '...', '\r', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 stop_words = 'a,able,about,across,after,all,almost,also,am,among,an,and,any,are,as,at,be,because,been,but,by,can,cannot,could,dear,did,do,does,either,else,ever,every,for,from,get,got,guy,had,has,have,how,however,i,if,in,into,is,it,its,just,least,let,like,likely,may,me,might,most,must,my,neither,no,nor,not,of,off,often,on,only,or,other,our,own,rather,said,say,says,should,since,so,some,something,than,that,the,their,them,then,there,theres,these,they,this,tis,to,too,twas,us,wants,was,we,were,what,when,where,which,while,who,whom,why,will,with,would,wont,yet,you,your'.split(',')
 
 
 class LyricScraper:
-
+    """Object that is used to scrape song names and lyrics with given artist(s)"""
 
     def __init__(self, artists, verbose = True):
-
         self.artists = artists
         self.verbose = verbose
     
 
     def _get_songs(self, artist, retries = 0):
+        """Scrapes the 50 most popular songs given an artist
+        
+        Parameters
+        ----------
+        artist: str
+        retries: int
+        
+        Returns
+        -------
+        songs: list
+        """
         if self.verbose:
             print(f"Getting songs for {artist}")
+            
         songs = []
         response = requests.get(last_fm_url + f'/2.0/?method=artist.gettoptracks&artist={artist}&api_key={last_fm_api_key}&format=json')
         try:
@@ -38,6 +49,7 @@ class LyricScraper:
                 self._get_genres(artist, song, retries)
             else:
                 return None
+   
         try:
             tracks = json_text['toptracks']
         except Exception as e:
@@ -51,10 +63,21 @@ class LyricScraper:
                 # print(song_name)
             songs.append(song_name)
         return songs
-        # for song-genre for artist
     
 
     def _get_genres(self, artist, song, retries = 0):
+        """Gets the genre given a song. This function is not necessary for our given problem. However, it was scrapaed just in case
+        
+        Parameters
+        ----------
+        artist: str
+        song: str
+        retries: int
+        
+        Returns
+        -------
+        genre: string
+        """
         response = requests.get(last_fm_url + f'/2.0/?method=track.getInfo&api_key={last_fm_api_key}&artist={artist}&track={song}&format=json')
         try:
             json_text = json.loads(response.text)
@@ -95,6 +118,18 @@ class LyricScraper:
 
 
     def _clean_song_name(self, name):
+        """Cleans song name of any additional info that is not needed
+        Ex:
+        song_name (feat. artist_a) -> song_name
+        
+        Parameters
+        ----------
+        name: string
+        
+        Returns
+        -------
+        correct_name: string
+        """
         name = name.split(' ')
         correct_name = ''
         for word in name:
@@ -108,6 +143,17 @@ class LyricScraper:
 
 
     def _get_lyrics(self, artist, song):
+        """Scrapes lyrics from AZLyrics given a song and artist name
+        
+        Parameters
+        ----------
+        arist: string
+        song: string
+        
+        Returns
+        -------
+        lyrics: string
+        """
         # scrape genius instead
         song_title = self._clean_song_name(song)
         artist = artist.lower() 
@@ -133,23 +179,39 @@ class LyricScraper:
             lyrics = lyrics.split(up_partition)[1] 
             lyrics = lyrics.split(down_partition)[0] 
             lyrics = lyrics.replace('<br/>','').replace('</br>','').replace('</div>','').strip().replace('\n', ' ')
-            return lyrics, song
+            return lyrics
         except Exception as e: 
-            return "\nException occurred \n" +str(e)  
-        # get lyrics for song
-    
+            return "\nException occurred \n" +str(e)      
 
-    def _clean_lyrics(self, lyric_song_tup):
-        lyric = lyric_song_tup[0]
-        song = lyric_song_tup[1]
+    def _clean_lyrics(self, lyric):
+        """Cleans lyrics of bad characters as wekk as stopwords
+        
+        Parameters
+        ----------
+        lyric: string
+        
+        Returns
+        -------
+        lyric: string
+        """
         for char in bad_chars:
             lyric = lyric.replace(char, "")
             lyric = ' '.join([i.lower()  for i in lyric.split(' ') if len(i) > 1 and i not in stop_words])
         return lyric
-        # clean lyric that is passed in
-
 
     def _file_has(self, label, song = None, file_name = 'test'):
+        """Checks if a given song has already been written out
+        
+        Parameters
+        ----------
+        label: string
+        song: None or string
+        file_name: string
+        
+        Returns
+        -------
+        bool
+        """
         file = open(f"../data/{file_name}.txt", "r", encoding='utf-8').readlines()
         if song is None:
             count = 0
@@ -167,11 +229,18 @@ class LyricScraper:
 
 
     def write(self, outfile="test"):
+        """Given a file name, scrapes songs and lyrics for each song, for each artist
+        
+        Parameters
+        ----------
+        outfile: string
+        """
         for artist in self.artists:
             if self._file_has(artist):
                 if self.verbose:
                     print(f"Duplicate: {artist}, skipping")
                 continue
+                
             songs = self._get_songs(artist)
             if songs is None:
                 continue
@@ -180,13 +249,16 @@ class LyricScraper:
                     if self.verbose:
                         print(f"Skipping {song}")
                     continue
+                    
                 lyric = self._clean_lyrics(self._get_lyrics(artist, song))
                 if self.verbose:
                     print(f"{songs.index(song) + 1}/{len(songs)}")
                 if len(lyric.split(' ')) < 30:
                     print("Couldn't find song or song lyrics, skipping", lyric)
                     continue    
+                    
                 genre = self._get_genres(artist, song)
+                
                 try:
                     with open(f"../data/{outfile}.txt", "a", encoding='utf-8') as f:
                         f.write(f"{artist}|{song}|{lyric}|{genre}\n")
@@ -196,12 +268,20 @@ class LyricScraper:
                     print("\nException occurred \n" + str(e))
                     if self.verbose:
                         print(lyric)
+                        
                 print(' ')
             if self.verbose:
                 print('\n\n')
 
 
     def add_artist(self, artist, outfile = 'test'):
+        """Adds an individual artist to the file
+        
+        Parameters
+        ----------
+        artist: string
+        outfile: string
+        """
         if not self._has_file(artist, col = 'artist'):
             dup = self.artists.copy()
             self.artists = [artist]
@@ -210,6 +290,15 @@ class LyricScraper:
 
 
     def add_song(self, artist, song, outfile = 'test'):
+        """
+        Adds an individual song to the file
+        
+        Parameters
+        ----------
+        artist: string
+        song: string
+        outfile: string
+        """
         if self._file_has(artist, song):
             return 'Song already in list'
         lyric = self._clean_lyrics(self._get_lyrics(artist, song))
@@ -232,8 +321,3 @@ class LyricScraper:
 if __name__ == '__main__':
     s = LyricScraper(artists)
     s.write()
-
-
-'''
-TODO
-'''
