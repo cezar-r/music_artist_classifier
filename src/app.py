@@ -5,15 +5,23 @@ from datetime import datetime
 app = Flask(__name__)
 
 class LyricPredictor:
+	"""Loads pickled model and casts predictions"""
 
 	def __init__(self):
 		self.load_model()
 
 	def predict(self, lyric):
+		"""Predicts artists given a lyric
+		
+		Parameters
+		----------
+		lyric: string
+		"""
 		artist_predictions = self.model.predict_one(lyric)
 		return artist_predictions
 
 	def load_model(self):
+		"""Loads model using Classifier.load() method"""
 		sg = Classifier()
 		self.model = sg.load()
 
