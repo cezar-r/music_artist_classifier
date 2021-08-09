@@ -1,0 +1,17 @@
+body {
+	background: black; 
+	color: white;
+}
+
+textarea {
+	background-color: #010D18 !important;
+	color: white !important	;
+}
+
+.table td, .table th {
+	border-top: none;
+}
+
+.artists {
+	padding-top: 40px;
+}
