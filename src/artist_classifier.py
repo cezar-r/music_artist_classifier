@@ -3,7 +3,7 @@
 
 """
 Contains 3 objects, all of which are sequantially used to cast a prediction in the web app.
-    DataManager(): Loads in data.
+    DataManager(): Loads in data
     Classifier(): Trains on data and pickles itself for later use
     LyricPredictor(): Uses pickled Classifier() model to predict artist
 """
