@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+'''
+This file can be used to load the data into a format that can be used for the BERT model
+BERT can be ran here: https://colab.research.google.com/github/tensorflow/text/blob/master/docs/tutorials/classify_text_with_bert.ipynb#scrollTo=6IwI_2bcIeX8
+'''
+
 import os
 import random
 from pathlib import Path
