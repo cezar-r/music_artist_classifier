@@ -160,6 +160,7 @@ class Classifier:
 		y = self.data.artist
 		self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size = .2)
 
+		
 	def _arr_to_str(self, x):
 		"""Converts an array to string
 		
@@ -176,6 +177,7 @@ class Classifier:
 		else:
 			return x
 
+		
 	def fit(self,  vector_params, over_sample = False, under_sample = False):
 		"""Trains model. Has parameters that dictate what parameters are used for the CountVectorizer
 		as well as parameters for over sampling and under sampling
@@ -244,7 +246,6 @@ class Classifier:
 		return classification_report(self.y_test, self.y_hat)
 
 
-
 	def _get_data(self, df):
 		"""Labels data in DataFrame using LabelEncoder object
 
@@ -271,7 +272,6 @@ class Classifier:
 		return data, y, genre_label_map
 
 
-
 	def _vectorizer(self, data):
 		"""Creates a tfidf and returns it as an np.array, as well as the feature names (vocabulary)
 	    
@@ -287,7 +287,6 @@ class Classifier:
 		tfidf = TfidfVectorizer()
 		X = tfidf.fit_transform(data).toarray()
 		return X, np.array(tfidf.get_feature_names())
-
 
 
 	def _plot_embedding(self, X, y, label_map):
@@ -340,10 +339,8 @@ class Classifier:
 	    plt.ylabel('PCA Dimension 2')
 	    plt.legend(handles = patches)
 	    plt.savefig('../images/pca_embedding_spaced_out_med4.png')
-	    # plt.show()
 
-
-
+		
 	def _clean_report(self, report):
 		"""Converts the classification report (type str) into a dictionary
 		
@@ -421,8 +418,6 @@ class Classifier:
 		self._plot_embedding(X_pca, y, label_map)
 
 
-
-
 	def predict_one(self, lyric, show = 10, verbose = False):
 		"""Predicts artists for one lyric
 		
@@ -470,9 +465,9 @@ class Classifier:
 		file = open(file, "rb")
 		instance = pickle.load(file)
 		file.close()
-
 		return instance
 
+	
 	def save(self, file = '../models/artist_classifier.pickle'):
 		"""Saves the model as pickle
 		
@@ -485,6 +480,7 @@ class Classifier:
 		file.close()
 
 
+		
 class LyricPredictor:
 	"""Loads pickled model and casts predictions"""
 
@@ -505,6 +501,7 @@ class LyricPredictor:
 		"""Loads model using Classifier.load() method"""
 		sg = Classifier()
 		self.model = sg.load()
+		
 		
 		
 def refit_model(print_accuracy = False, 
