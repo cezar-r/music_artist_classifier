@@ -35,17 +35,12 @@ def df_to_tf_dirs():
 	for i in range(len(data)):
 		lyric = data.iloc[i, 0]
 		artist = data.iloc[i, 1]
-
 		artist = "_".join(artist.split(' '))
-
 		print(f"{artist} {i+1}/{len(data)}")
 
 		filename = f'{i+1:07}'
-
 		if random.randint(1, 10) <= 2:
-
 			Path(f"../bert_data/test/{artist}").mkdir(parents=True, exist_ok=True)
-			
 			with open(f"../bert_data/test/{artist}/{filename}.txt", "w") as f:
 				f.write(lyric)
 
