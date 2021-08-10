@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+'''
+Scrapes artist names from a list of 500 artists of various genres
+This file is automatically ran when imported into src/scraping.py, therefore it is not recommened to run 
+this on its own
+'''
+
 import requests
 
 scraper_url = 'http://api.scraperapi.com?api_key=<API KEY HERE>&url='
