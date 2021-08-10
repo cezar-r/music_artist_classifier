@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Runs the Flask web application
+Runs the Flask web application.
 """
 
 from flask import Flask, render_template, request
