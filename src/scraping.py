@@ -192,6 +192,7 @@ class LyricScraper:
         except Exception as e: 
             return "\nException occurred \n" +str(e)      
 
+        
     def _clean_lyrics(self, lyric):
         """Cleans lyrics of bad characters as wekk as stopwords
         
@@ -208,6 +209,7 @@ class LyricScraper:
             lyric = ' '.join([i.lower()  for i in lyric.split(' ') if len(i) > 1 and i not in stop_words])
         return lyric
 
+    
     def _file_has(self, label, song = None, file_name = 'test'):
         """Checks if a given song has already been written out
         
