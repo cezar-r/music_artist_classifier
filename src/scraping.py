@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Scrapes song lyrics for various artists using the LyricScraper() object
+Data is written in CSV format.
+The program utilizes a Scraper API key for proxies, as well as a LastFM API key to obtain song names.
+"""
+
 import requests
 import json
 import re 
