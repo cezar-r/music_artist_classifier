@@ -86,3 +86,11 @@ Pipeline([('vect', CountVectorizer()),
 - JSON
 - Flask
 - Bootstrap
+
+
+## Running the Model Yourself
+
+- Since the pickled model was much too large to push to GitHub, if you want to run this on your end you will have to create the pickle file itself. This can be done in a few simple steps:
+- 1) Create a folder called "models"
+- 2) Go into src/artist_classifier.py and run refit_model(save_model = True)
+- 3) You're all set! You can now run src/app.py to launch the web app
