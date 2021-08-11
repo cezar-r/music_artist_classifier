@@ -2,7 +2,7 @@
 
 ### Background
 
-Can a machine tell music artists apart by only looking at their lyrics? Better yet, can it actually predict who would sing a lyric? This project will dive into these questions.
+Can a computer tell music artists apart by only looking at their lyrics? Better yet, can it actually predict who would sing a lyric? This project will dive into these questions.
 For some aspiring artists out there, this program can be used to tell them who they sound like. 
 
 ## Data
