@@ -48,7 +48,7 @@ Pipeline([('vect', CountVectorizer()),
 3. **Unsupervised Learning**
 
 - In measuring accuracy, I also measured the accuracy for each category and I noticed some artists were consistently getting predicted with higher accuracies. My reasoning behind this was that those artists simply used very different semantics to the other artists. This can be visualized with a PCA embedding graph. In the graph below, the artists that were in the top 10 in terms of accuracies are labelled. All other artists are labelled as "other" 
-<img src = "images/pca_embedding_spaced_out_med4.png" width = 800 height = 400>
+<img src = "images/pca_embedding_spaced_out_med5.png" width = 800 height = 400>
 
 - As you can see, these artists that the model was doing a better job of classifiying are mostly on the outskirts of this cluster, which signifies that these artists do indeed have something much more unique about their semantics than most other artists.
 
