@@ -6,7 +6,7 @@ Can a computer tell music artists apart by only looking at their lyrics? Better 
 For some aspiring artists out there, this program can be used to tell them what artist they most resemble, lyrically. 
 
 ## Data
-![-----------------------------------------------------](https://raw.githubusercontent.com/cezar-r/music_artist_classifier/images/blue_green.png)
+[![-----------------------------------------------------](https://raw.githubusercontent.com/cezar-r/music_artist_classifier/images/blue_green.png)]
 The dataset contains over 12,000 songs by 336 artists in a wide variety of genres. This model can only get better with more data, so more songs and artists are continuously being added.
 
 1. **Scraping Data**
