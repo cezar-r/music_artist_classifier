@@ -577,4 +577,6 @@ def load_model():
 	model = sg.load()
 	return model
 
-
+# uncomment me to save a pickled model
+# if __name__ == '__main__':
+# 	refit_model(save_model = True)
