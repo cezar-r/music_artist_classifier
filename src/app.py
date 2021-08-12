@@ -37,9 +37,9 @@ def predict():
 	og_lyric = str(request.form['lyric'])
 	lyric = clean_input(og_lyric)
 	lyric = lyric.capitalize()
-	lyric = '"' + lyric + '"'
 	artists = clf.predict(lyric)
 	artists = [i.title() for i in artists]
+	og_lyric = '"' + og_lyric + '"'
 	return render_template('index_pred.html', data = (artists, og_lyric))
 
 
