@@ -23,7 +23,7 @@ def clean_input(lyric):
 				word = word.replace(char, "")
 			clean_lyric += word + ' '
 	clean_lyric = " ".join(clean_lyric.split())
-	return clean_lyric[:-1]
+	return clean_lyric[:-1].capitalize()
 
 
 
@@ -36,7 +36,6 @@ def index():
 def predict():
 	og_lyric = str(request.form['lyric'])
 	lyric = clean_input(og_lyric)
-	lyric = lyric.capitalize()
 	artists = clf.predict(lyric)
 	artists = [i.title() for i in artists]
 	og_lyric = '"' + og_lyric + '"'
